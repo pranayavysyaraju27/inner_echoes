@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Journal - Inner Echoes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body { background: #F9FAFB; color: #334155; min-height: 100vh; }
+    .app-shell { display: flex; min-height: 100vh; }
+    .app-sidebar { width: 240px; background: #E2E8F0; border-right: 1px solid #CBD5E1; padding: 26px; position: fixed; top: 0; left: 0; bottom: 0; }
+    .app-sidebar a { display: block; color: #334155; text-decoration: none; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+    .app-sidebar a.active, .app-sidebar a:hover { background: linear-gradient(135deg, #E2E8F0, #CBD5E1); }
+    .app-content { margin-left: 240px; padding: 32px; width: calc(100% - 240px); max-width: 1200px; margin-right: auto; }
+    .section-card { background: white; border-radius: 18px; box-shadow: 0 8px 20px rgba(15,23,42,0.08); padding: 24px; margin-bottom: 24px; }
+    .input-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; margin: 18px 0; }
+    .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 30px rgba(15,23,42,0.12); }
+    .mood-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; margin-top: 6px; }
+    .mood-pill.happy { background: #FFD76A; color: #334155; }
+    .mood-pill.sad { background: #6CA6FF; color: #12357A; }
+    .mood-pill.deep { background: #9F7AEA; color: #2E1F47; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <h1>Inner Echoes</h1>
+      <div class="tagline">Where your thoughts find their voice</div>
+      <a href="/">Home</a>
+      <a href="/journal" class="active">Journal</a>
+      <a href="/mood">Mood</a>
+      <a href="/uploads">Uploads</a>
+      <a href="/profile">Profile</a>
+    </aside>
+    <main class="app-content">
+      <div class="section-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2>Your Thoughts</h2>
+          <a href="/add" class="btn btn-primary">+ New Entry</a>
+        </div>
+        <form class="mt-3" method="get" action="/journal">
+          <div class="row g-2 align-items-center">
+            <div class="col-auto">
+              <label class="form-label">Mood</label>
+              <select class="form-select" name="mood" onchange="this.form.submit()">
+                <option value="all" {% if mood_filter == 'all' %}selected{% endif %}>All</option>
+                <option value="happy" {% if mood_filter == 'happy' %}selected{% endif %}>Happy</option>
+                <option value="sad" {% if mood_filter == 'sad' %}selected{% endif %}>Sad</option>
+                <option value="deep" {% if mood_filter == 'deep' %}selected{% endif %}>Deep</option>
+              </select>
+            </div>
+          </div>
+        </form>
+        <div class="input-card">
+          <div class="mb-2"><strong>Journal quickly</strong></div>
+          <input class="form-control form-control-lg mb-2" placeholder="Title" disabled>
+          <textarea class="form-control" rows="4" placeholder="Write freely..." disabled></textarea>
+          <div class="mt-3"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-mic"></i> Voice</button> <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-paperclip"></i> Upload</button></div>
+        </div>
+      </div>
+      {% if entries %}
+        <div class="row g-3">
+          {% for entry in entries %}
+            <div class="col-md-6">
+              <div class="section-card hover-lift">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong>{{ entry.title }}</strong>
+                  <span>
+                    <a href="/entry/{{ entry.date }}" class="text-primary me-2" title="View"><i class="bi bi-eye"></i></a>
+                    <a href="/edit/{{ entry.id }}" class="text-secondary me-2" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <a href="/delete/{{ entry.id }}" class="text-danger" title="Delete" onclick="return confirm('Delete this entry?')"><i class="bi bi-trash"></i></a>
+                  </span>
+                </div>
+                <p style="color:#64748B;">{{ entry.content|truncate(110) }}</p>
+                <small>{{ entry.date }}</small>
+                <div><span class="mood-pill {{ 'deep' if entry.mood == 'sappy' else entry.mood }}">{{ entry.mood|title }}</span></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No journal entries yet.</p>
+      {% endif %}
+    </main>
+  </div>
+</body>
+</html>

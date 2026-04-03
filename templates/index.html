@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inner Echoes - Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar { background: rgba(255,255,255,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .navbar-brand { color: #667eea !important; font-weight: bold; font-size: 24px; }
+        .nav-link { color: #666 !important; font-weight: 500; transition: color 0.3s; }
+        .nav-link:hover { color: #667eea !important; }
+        .container-main { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 20px; }
+        .main-content { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .sidebar { display: none; }
+        .mini-calendar { display: none; }
+        .quick-stats { display: none; }
+        .mini-cal-day { text-align: center; padding: 8px 5px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .mini-cal-day:hover { background: rgba(255,255,255,0.2); }
+        .mini-cal-day.today { background: #FFD700; color: #667eea; font-weight: bold; }
+        .mini-cal-day.has-entry { background: #FF6B6B; font-weight: bold; }
+        .main-content { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .month-title { font-size: 28px; font-weight: bold; color: #333; }
+        .nav-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 20px; }
+        .calendar-day-label { text-align: center; font-weight: bold; color: #667eea; padding: 10px; }
+        .calendar-day { 
+            aspect-ratio: 1; 
+            border-radius: 12px; 
+            border: 2px solid #eee; 
+            padding: 10px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            background: white;
+        }
+        .calendar-day:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .calendar-day.empty { background: transparent; border: none; }
+        .calendar-day.other-month { color: #ccc; }
+        .calendar-day a { display: block; width: 100%; height: 100%; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .calendar-day-number { font-weight: bold; font-size: 18px; }
+        .calendar-day-mood { font-size: 20px; margin-top: 5px; }
+        .happy { background: linear-gradient(135deg, #FFD700, #FFC700) !important; color: #333; }
+        .sad { background: linear-gradient(135deg, #4169E1, #1E40AF) !important; color: white; }
+        .sappy { background: linear-gradient(135deg, #228B22, #1a6b1a) !important; color: white; }
+        .bored { background: linear-gradient(135deg, #A9A9A9, #808080) !important; color: white; }
+        .anxious { background: linear-gradient(135deg, #9370DB, #7B2CBF) !important; color: white; }
+        .angry { background: linear-gradient(135deg, #DC143C, #B21E35) !important; color: white; }
+        .excited { background: linear-gradient(135deg, #FF8C00, #FF6F00) !important; color: white; }
+        .quick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 2px solid #eee; }
+        .stat { background: linear-gradient(135deg, #f5f5f5, #e9e9e9); padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 12px; color: #666; margin-top: 5px; }
+        .mood-legend { display: flex; gap: 10px; flex-wrap: wrap; }
+        .legend-pill { padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: #fff; }
+        .legend-pill.happy { background: linear-gradient(135deg, #FFD700, #FFC700); color: #333; }
+        .legend-pill.sad { background: linear-gradient(135deg, #4169E1, #1E40AF); }
+        .legend-pill.sappy { background: linear-gradient(135deg, #228B22, #1a6b1a); }
+        .legend-pill.bored { background: linear-gradient(135deg, #A9A9A9, #808080); }
+        .legend-pill.anxious { background: linear-gradient(135deg, #9370DB, #7B2CBF); }
+        .legend-pill.angry { background: linear-gradient(135deg, #DC143C, #B21E35); }
+        .legend-pill.excited { background: linear-gradient(135deg, #FF8C00, #FF6F00); }
+        @media (max-width: 900px) { 
+            .container-main { grid-template-columns: 1fr; }
+            .sidebar { height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="bi bi-journal"></i> Inner Echoes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex me-auto" action="/search" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search entries..." aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/add"><i class="bi bi-pen"></i> New Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/journal"><i class="bi bi-journal-text"></i> Journal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/search"><i class="bi bi-search"></i> Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="bi bi-bar-chart"></i> Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-door-open"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="main-content">
+            <div class="stats-header" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 15px;">
+                <div class="quick-stats" style="display: flex; gap: 15px; align-items: center; justify-content: flex-start;">
+                    <div class="stat" style="flex: 1; min-width: 130px;">
+                        <div class="stat-number">{{ entries|length }}</div>
+                        <div class="stat-label">Total Entries</div>
+                    </div>
+                    <div class="stat" style="flex: 1; min-width: 160px;">
+                        <div class="stat-number">{{ year }}-{{ '%02d'|format(month) }}</div>
+                        <div class="stat-label">Displayed Month</div>
+                    </div>
+                </div>
+                <button id="toggleStats" class="btn btn-sm btn-outline-secondary" onclick="toggleStats()">Hide Stats</button>
+            </div>
+
+            <div id="moodLegend" class="mood-legend" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="legend-pill happy">Happy</div>
+                <div class="legend-pill sad">Sad</div>
+                <div class="legend-pill sappy">Sappy</div>
+                <div class="legend-pill bored">Bored</div>
+                <div class="legend-pill anxious">Anxious</div>
+                <div class="legend-pill angry">Angry</div>
+                <div class="legend-pill excited">Excited</div>
+            </div>
+
+            {% if flash_msg %}
+            <div class="alert alert-success" role="alert" style="border-radius: 12px;">
+                {{ flash_msg }}
+            </div>
+            {% endif %}
+
+            <!-- Main Calendar View -->
+        <div class="main-content">
+            <div class="month-nav">
+                <button class="nav-btn" onclick="previousMonth()">← Previous</button>
+                <div class="month-title">{{ datetime(year, month, 1).strftime('%B %Y') }}</div>
+                <button class="nav-btn" onclick="nextMonth()">Next →</button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="calendar-day-label">Monday</div>
+                <div class="calendar-day-label">Tuesday</div>
+                <div class="calendar-day-label">Wednesday</div>
+                <div class="calendar-day-label">Thursday</div>
+                <div class="calendar-day-label">Friday</div>
+                <div class="calendar-day-label">Saturday</div>
+                <div class="calendar-day-label">Sunday</div>
+
+                {% for week in cal %}
+                {% for day in week %}
+                {% if day == 0 %}
+                <div class="calendar-day empty"></div>
+                {% else %}
+                {% set date_key = year|string + '-' + "%02d"|format(month) + '-' + "%02d"|format(day) %}
+                {% set moods = entry_moods.get(date_key) %}
+                <div class="calendar-day" style="position: relative; {% if moods %}background: #f8f9fa;{% endif %}">
+                    {% if moods %}
+                        <a href="/entry/{{ date_key }}" title="View {{ moods|length }} entries">
+                            <div class="calendar-day-number">{{ day }}</div>
+                            <div class="calendar-day-mood" style="display:flex; justify-content:center; gap:4px; flex-wrap:wrap; margin-top:5px;">
+                                {% for m in moods %}
+                                    <span class="legend-pill {{ m }}" style="width:12px; height:12px; padding:0; border-radius:50%; display:inline-block; border:1px solid rgba(0,0,0,0.1);" title="{{ m|title }}"></span>
+                                {% endfor %}
+                            </div>
+                        </a>
+                    {% else %}
+                        <a href="/add?date={{ date_key }}" title="Add entry for {{ date_key }}">
+                            <div class="calendar-day-number">{{ day }}</div>
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previousMonth() {
+            let month = {{ month }};
+            let year = {{ year }};
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+            window.location.href = `/?month=${month}&year=${year}`;
+        }
+        function nextMonth() {
+            let month = {{ month }};
+            let year = {{ year }};
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+            window.location.href = `/?month=${month}&year=${year}`;
+        }
+
+        function toggleStats() {
+            const quickStats = document.querySelector('.stats-header .quick-stats');
+            const legend = document.getElementById('moodLegend');
+            const btn = document.getElementById('toggleStats');
+            if (!quickStats || !legend) return;
+
+            const show = quickStats.style.display !== 'none';
+            quickStats.style.display = show ? 'none' : 'flex';
+            legend.style.display = show ? 'none' : 'flex';
+            btn.innerText = show ? 'Show Stats' : 'Hide Stats';
+        }
+    </script>
+</body>
+</html>

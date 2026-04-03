@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entry - Inner Echoes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .navbar { background: rgba(255,255,255,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .navbar-brand { color: #667eea !important; font-weight: bold; font-size: 24px; }
+        .nav-link { color: #666 !important; font-weight: 500; transition: color 0.3s; }
+        .nav-link:hover { color: #667eea !important; }
+        .editor-container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .editor-panel { background: #f0f4ff; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); }
+        .editor-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(102,126,234,0.25); }
+        .editor-toolbar h2 { margin: 0; font-size: 24px; font-weight: bold; color: #333; }
+        .editor-notebar { font-size: 14px; color: #666; }
+        .note-banner { display: flex; justify-content: center; align-items: center; gap: 8px; background: #e8ecff; color: #2d3e8f; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+        .back-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        .back-btn:hover { color: white; transform: translateY(-2px); }
+        .form-actions { text-align: right; margin-top: 18px; }
+        .btn-save { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 10px 16px; border-radius: 8px; }
+        .btn-save:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="bi bi-journal"></i> Inner Echoes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-calendar"></i> Calendar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/add"><i class="bi bi-pen"></i> New Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-bar-chart"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-door-open"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="editor-container">
+        <a href="/" class="back-btn">← Back to Calendar</a>
+        <div class="editor-panel">
+            <div class="editor-toolbar">
+                <h2>✏️ Edit Entry</h2>
+                <span class="editor-notebar">Keep your memory flow strong.</span>
+            </div>
+            <div class="note-banner"><strong>Tip:</strong> Update your text, mood, or date and save to apply changes.</div>
+            <form method="POST" enctype="multipart/form-data" style="padding: 25px;">
+                <div class="form-group mb-3">
+                    <label class="form-label">📌 Title</label>
+                    <input type="text" class="form-control" name="title" value="{{ entry.title }}" required>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">📅 Date</label>
+                        <input type="date" class="form-control" name="date" value="{{ entry.date }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">🎭 Mood</label>
+                        <select class="form-select" name="mood" required>
+                            {% for m in ['happy','sad','sappy','bored','anxious','angry','excited'] %}
+                            <option value="{{ m }}" {% if entry.mood == m %}selected{% endif %}>{{ m.title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">📝 Content</label>
+                    <input type="hidden" name="content" id="contentInput" required>
+                    <div id="editor-container" style="height: 350px; background: white; border-radius: 0 0 8px 8px;">{{ entry.content | safe }}</div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    ['clean']
+                ]
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var contentInput = document.getElementById('contentInput');
+            if (quill.getText().trim().length === 0) {
+                e.preventDefault();
+                alert('Please write some thoughts before saving.');
+                return;
+            }
+            contentInput.value = quill.root.innerHTML;
+        });
+    </script>
+</body>
+</html>

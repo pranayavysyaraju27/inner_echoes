@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@{{ session.username }} - Inner Echoes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #fafafa; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #262626;
+        }
+        .navbar { 
+            background: white; 
+            border-bottom: 1px solid #dbdbdb; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .navbar-brand { color: #333 !important; font-weight: 600; }
+        .nav-link { color: #333 !important; }
+        .profile-container { max-width: 935px; margin: 0 auto; padding: 30px 20px; }
+        .profile-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 44px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid #dbdbdb;
+        }
+        .profile-pic { 
+            width: 150px; 
+            height: 150px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-size: 60px; 
+            margin-right: 80px;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #dbdbdb;
+        }
+        .profile-info { flex: 1; }
+        .profile-username { 
+            font-size: 28px; 
+            font-weight: 300; 
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .edit-btn { 
+            background: white; 
+            border: 1px solid #dbdbdb; 
+            border-radius: 4px; 
+            padding: 5px 9px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: #262626; 
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .edit-btn:hover { background: #fafafa; }
+        .profile-stats { 
+            display: flex; 
+            gap: 40px; 
+            margin-bottom: 20px;
+        }
+        .stat { font-size: 16px; }
+        .stat strong { font-weight: 600; }
+        .profile-bio { font-size: 16px; line-height: 1.5; }
+        .profile-bio .name { font-weight: 600; margin-bottom: 5px; }
+        .posts-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 28px;
+        }
+        .post-card { 
+            aspect-ratio: 1; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            background: white; 
+            border: 1px solid #dbdbdb; 
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .post-card:hover { transform: scale(1.02); }
+        .post-card .mood-icon { 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 48px;
+        }
+        .post-overlay { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            opacity: 0; 
+            transition: opacity 0.2s;
+        }
+        .post-card:hover .post-overlay { opacity: 1; }
+        .post-overlay .date { color: white; font-weight: 600; font-size: 14px; margin-top: 5px; }
+        .post-overlay .view-text { color: white; font-weight: 600; font-size: 16px; }
+        .post-overlay .edit-btn-small { 
+            position: absolute; 
+            top: 5px; 
+            right: 5px; 
+            color: white; 
+            font-size: 16px; 
+            text-decoration: none; 
+            background: rgba(0,0,0,0.5); 
+            padding: 5px; 
+            border-radius: 50%; 
+        }
+        .no-posts { 
+            text-align: center; 
+            padding: 80px 20px; 
+            color: #8e8e8e;
+        }
+        .no-posts h3 { font-size: 24px; margin-bottom: 10px; }
+        .no-posts p { font-size: 16px; margin-bottom: 20px; }
+        .no-posts .btn { 
+            background: #0095f6; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            padding: 7px 16px; 
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .happy { background: linear-gradient(135deg, #FFD700, #FFC700); color: #333; }
+        .sad { background: linear-gradient(135deg, #4169E1, #1E40AF); color: white; }
+        .deep { background: linear-gradient(135deg, #228B22, #1a6b1a); color: white; }
+        .bored { background: linear-gradient(135deg, #A9A9A9, #808080); color: white; }
+        .anxious { background: linear-gradient(135deg, #9370DB, #7B2CBF); color: white; }
+        .angry { background: linear-gradient(135deg, #DC143C, #B21E35); color: white; }
+        .excited { background: linear-gradient(135deg, #FF8C00, #FF6F00); color: white; }
+        @media (max-width: 768px) {
+            .profile-header { flex-direction: column; text-align: center; }
+            .profile-pic { margin-right: 0; margin-bottom: 20px; }
+            .posts-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="bi bi-journal"></i> Inner Echoes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/add"><i class="bi bi-pen"></i> Add Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-door-open"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-pic">
+                {% if user_data.profile_pic %}
+                <img src="/static/uploads/{{ user_data.profile_pic }}?t={{ user_data.profile_pic.split('_')[-1].split('.')[0] }}" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                <i class="bi bi-person-circle"></i>
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <div class="profile-username">
+                    {{ session.username }}
+                    <a href="/edit_profile" class="edit-btn">Edit Profile</a>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat"><strong>{{ total_entries }}</strong> posts</div>
+                    <div class="stat"><strong>{{ mood_counts|length }}</strong> moods</div>
+                    <div class="stat"><strong>{{ most_frequent_mood or 'None' }}</strong> favorite</div>
+                </div>
+                <div class="profile-bio">
+                    <div class="name">{{ user_data.full_name or session.username }}</div>
+                    {% if user_data.bio %}
+                    <div>{{ user_data.bio }}</div>
+                    {% else %}
+                    <div style="color: #8e8e8e;">No bio yet</div>
+                    {% endif %}
+                    <div style="color: #8e8e8e; font-size: 14px;">Joined {{ user_data.joined_date }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Grid -->
+        {% if total_entries > 0 %}
+        <div class="posts-grid">
+            {% for entry in entries %}
+            <div class="post-card {{ entry.mood }}">
+                <div class="mood-icon">
+                    {% if entry.mood == 'happy' %}😊{% elif entry.mood == 'sad' %}😢{% elif entry.mood == 'deep' %}💭{% elif entry.mood == 'bored' %}😐{% elif entry.mood == 'anxious' %}😰{% elif entry.mood == 'angry' %}😠{% elif entry.mood == 'excited' %}🤩{% else %}📝{% endif %}
+                </div>
+                <a href="/entry/{{ entry.date }}" class="post-overlay">
+                    <div class="view-text">View Entry</div>
+                    <div class="date">{{ entry.date }}</div>
+                    <a href="/edit/{{ entry.id }}" class="edit-btn-small" title="Edit Entry">✏️</a>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-posts">
+            <h3>Share your first memory</h3>
+            <p>When you share photos and videos, they'll appear on your profile.</p>
+            <a href="/add" class="btn">Share your first entry</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

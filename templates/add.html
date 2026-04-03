@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write Entry - Inner Echoes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: rgba(255,255,255,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .navbar-brand { color: #667eea !important; font-weight: bold; font-size: 24px; }
+        .nav-link { color: #666 !important; font-weight: 500; transition: color 0.3s; }
+        .nav-link:hover { color: #667eea !important; }
+        .editor-container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .back-btn { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border: none; 
+            color: white; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover { color: white; transform: translateY(-2px); }
+        .editor-panel {
+            background: #f0f4ff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+        }
+        .editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(102,126,234,0.25);
+        }
+        .editor-toolbar h2 { margin: 0; font-size: 24px; font-weight: bold; color: #333; }
+        .editor-notebar { font-size: 14px; color: #666; }
+        .note-banner { display: flex; justify-content: center; align-items: center; gap: 8px; background: #e8ecff; color: #2d3e8f; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+        .note-banner strong { font-weight: 700; }
+            overflow:hidden;
+        }
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            border-bottom: 2px solid #f0f0f0;
+            background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label { font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; }
+        .form-control { 
+            border: 2px solid #eee; 
+            border-radius: 8px; 
+            padding: 12px 15px; 
+            font-size: 16px;
+        }
+        .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15); }
+        textarea.form-control { 
+            min-height: 400px; 
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+        }
+        .mood-selector { display: flex; flex-wrap: wrap; gap: 10px; }
+        .mood-btn { 
+            padding: 10px 15px; 
+            border: 2px solid transparent; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: white;
+            transition: all 0.3s;
+            opacity: 0.6;
+        }
+        .mood-btn:hover { opacity: 1; transform: translateY(-2px); }
+        .mood-btn.active { opacity: 1; border: 2px solid #333; transform: scale(1.05); }
+        .mood-btn.happy { background: linear-gradient(135deg, #FFD700, #FFC700); color: #333; }
+        .mood-btn.sad { background: linear-gradient(135deg, #4169E1, #1E40AF); }
+        .mood-btn.sappy { background: linear-gradient(135deg, #228B22, #1a6b1a); }
+        .mood-btn.bored { background: linear-gradient(135deg, #A9A9A9, #808080); }
+        .mood-btn.anxious { background: linear-gradient(135deg, #9370DB, #7B2CBF); }
+        .mood-btn.angry { background: linear-gradient(135deg, #DC143C, #B21E35); }
+        .mood-btn.excited { background: linear-gradient(135deg, #FF8C00, #FF6F00); }
+        .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-save { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border: none; 
+            color: white; 
+            padding: 12px 30px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer;
+            flex: 1;
+            transition: transform 0.2s;
+        }
+        .btn-save:hover { transform: translateY(-2px); }
+        .editor-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="bi bi-journal"></i> Inner Echoes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-calendar"></i> Calendar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/add"><i class="bi bi-pen"></i> New Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-bar-chart"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-door-open"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="editor-container">
+        <a href="/" class="back-btn">← Back to Calendar</a>
+        
+        <div class="editor-panel">
+            <div class="editor-toolbar">
+                <h2>📝 Notes-style Journal</h2>
+                <span class="editor-notebar">Use wide-screen mode: write down anything you feel, mood + memory.</span>
+            </div>
+            <div class="note-banner"><strong>Tip:</strong> Start with a title, then expand thoughts on the big area below.</div>
+            
+            <form method="POST" enctype="multipart/form-data" style="padding: 25px;" >
+                <div class="form-group">
+                    <label class="form-label">📌 Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="What's on your mind?" required>
+                </div>
+
+                <div class="editor-row">
+                    <div class="form-group">
+                        <label class="form-label">📅 Date</label>
+                        <input type="date" class="form-control" name="date" value="{{ date_default if date_default else '' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🎭 Mood</label>
+                        <div class="mood-selector">
+                            <button type="button" class="mood-btn happy active" onclick="selectMood(event, 'happy')">😊 Happy</button>
+                            <button type="button" class="mood-btn sad" onclick="selectMood(event, 'sad')">😢 Sad</button>
+                            <button type="button" class="mood-btn deep" onclick="selectMood(event, 'deep')">💭 Deep</button>
+                            <button type="button" class="mood-btn bored" onclick="selectMood(event, 'bored')">😐 Bored</button>
+                            <button type="button" class="mood-btn anxious" onclick="selectMood(event, 'anxious')">😰 Anxious</button>
+                            <button type="button" class="mood-btn angry" onclick="selectMood(event, 'angry')">😠 Angry</button>
+                            <button type="button" class="mood-btn excited" onclick="selectMood(event, 'excited')">🤩 Excited</button>
+                        </div>
+                        <input type="hidden" name="mood" id="selectedMood" required value="happy">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                        <label class="form-label" style="margin-bottom:0;">📝 Your Thoughts</label>
+                        <button type="button" id="micBtn" class="btn btn-sm btn-outline-secondary rounded-pill">
+                            <i class="bi bi-mic"></i> Voice Typing
+                        </button>
+                    </div>
+                    <input type="hidden" name="content" id="contentInput" required>
+                    <div id="editor-container" style="height: 350px; background: white; border-radius: 0 0 8px 8px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📸 Attach Image (Optional)</label>
+                    <input type="file" class="form-control" name="file">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🏷️ Tags (Optional, comma-separated)</label>
+                    <input type="text" class="form-control" name="tags" placeholder="e.g., work, personal, happy">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">💾 Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        function selectMood(event, mood) {
+            event.preventDefault();
+            document.getElementById('selectedMood').value = mood;
+            const buttons = document.querySelectorAll('.mood-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.mood-btn').classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const moodInput = document.getElementById('selectedMood');
+            if (moodInput && !moodInput.value) {
+                moodInput.value = 'happy';
+            }
+        });
+
+        // Initialize Quill editor
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: 'Write your thoughts, feelings, and experiences...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    ['clean']
+                ]
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var contentInput = document.getElementById('contentInput');
+            // Check if quill is practically empty
+            if (quill.getText().trim().length === 0) {
+                e.preventDefault();
+                alert('Please write some thoughts before saving.');
+                return;
+            }
+            contentInput.value = quill.root.innerHTML;
+        });
+
+        // Voice to Text
+        const micBtn = document.getElementById('micBtn');
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            let isRecording = false;
+            
+            recognition.onstart = function() {
+                isRecording = true;
+                micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Listening...';
+                micBtn.classList.remove('btn-outline-secondary');
+                micBtn.classList.add('btn-danger');
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const length = quill.getLength();
+                quill.insertText(length ? length - 1 : 0, transcript + ' ');
+            };
+            
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error", event.error);
+                resetMicBtn();
+            };
+            
+            recognition.onend = function() {
+                resetMicBtn();
+            };
+            
+            function resetMicBtn() {
+                isRecording = false;
+                micBtn.innerHTML = '<i class="bi bi-mic"></i> Voice Typing';
+                micBtn.classList.remove('btn-danger');
+                micBtn.classList.add('btn-outline-secondary');
+            }
+            
+            micBtn.addEventListener('click', () => {
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+        } else {
+            micBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

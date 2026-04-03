@@ -1,0 +1,29 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# User uploads (if you don't want to commit personal images)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

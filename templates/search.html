@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - Inner Echoes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: rgba(255,255,255,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .navbar-brand { color: #667eea !important; font-weight: bold; font-size: 24px; }
+        .nav-link { color: #666 !important; font-weight: 500; transition: color 0.3s; }
+        .nav-link:hover { color: #667eea !important; }
+        .search-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .search-panel { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-label { font-weight: 600; color: #333; margin-bottom: 8px; }
+        .form-control { border: 2px solid #eee; border-radius: 8px; padding: 10px; }
+        .form-control:focus { border-color: #667eea; }
+        .btn-search { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 12px 30px; border-radius: 8px; font-weight: bold; }
+        .entry-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
+        .entry-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; }
+        .entry-body { padding: 20px; }
+        .mood-badge { display: inline-block; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .happy { background-color: #FFD700; color: #333; }
+        .sad { background-color: #4169E1; }
+        .deep { background-color: #228B22; }
+        .bored { background-color: #A9A9A9; }
+        .anxious { background-color: #9370DB; }
+        .angry { background-color: #DC143C; }
+        .excited { background-color: #FF8C00; }
+        .tags { margin-top: 10px; }
+        .tag { display: inline-block; background: #f0f0f0; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="bi bi-journal"></i> Inner Echoes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/add"><i class="bi bi-pen"></i> Add Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/journal"><i class="bi bi-journal-text"></i> Journal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-door-open"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="search-container">
+        <div class="search-panel">
+            <h2 class="mb-4">🔍 Search & Filter Entries</h2>
+            
+            <form method="GET" class="mb-4">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label class="filter-label">Keyword</label>
+                        <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search titles, content, tags...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Mood</label>
+                        <select class="form-control" name="mood">
+                            <option value="all" {% if mood_filter == 'all' %}selected{% endif %}>All Moods</option>
+                            <option value="happy" {% if mood_filter == 'happy' %}selected{% endif %}>Happy</option>
+                            <option value="sad" {% if mood_filter == 'sad' %}selected{% endif %}>Sad</option>
+                            <option value="deep" {% if mood_filter == 'deep' %}selected{% endif %}>Deep</option>
+                            <option value="bored" {% if mood_filter == 'bored' %}selected{% endif %}>Bored</option>
+                            <option value="anxious" {% if mood_filter == 'anxious' %}selected{% endif %}>Anxious</option>
+                            <option value="angry" {% if mood_filter == 'angry' %}selected{% endif %}>Angry</option>
+                            <option value="excited" {% if mood_filter == 'excited' %}selected{% endif %}>Excited</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tag</label>
+                        <input type="text" class="form-control" name="tag" value="{{ tag_filter }}" placeholder="Filter by tag">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date From</label>
+                        <input type="date" class="form-control" name="date_from" value="{{ date_from }}">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date To</label>
+                        <input type="date" class="form-control" name="date_to" value="{{ date_to }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn-search">Search</button>
+            </form>
+
+            <h4>Results ({{ entries|length }} entries)</h4>
+            
+            {% if entries %}
+                {% for entry in entries %}
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>{{ entry.title }}</strong>
+                            <span class="mood-badge {{ entry.mood }}">{{ entry.mood }}</span>
+                        </div>
+                    </div>
+                    <div class="entry-body">
+                        <p class="text-muted mb-2">📅 {{ entry.date }}</p>
+                        <p>{{ entry.content[:200] }}{% if entry.content|length > 200 %}...{% endif %}</p>
+                        {% if entry.tags %}
+                        <div class="tags">
+                            {% for tag in entry.tags.split(',') %}
+                            <span class="tag">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div style="margin-top: 10px;">
+                            <a href="/entry/{{ entry.date }}" class="btn btn-sm btn-outline-primary">👁️ View</a>
+                            <a href="/edit/{{ entry.id }}" class="btn btn-sm btn-outline-secondary">✏️ Edit</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <h5>No entries found</h5>
+                    <p>Try adjusting your search criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
